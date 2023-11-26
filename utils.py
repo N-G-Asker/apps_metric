@@ -46,7 +46,7 @@ def evaluate_generations(generations: list, level: str = "all", debug: bool = Fa
      """
 
     # generations are code generations in the same order of the dataset
-    apps_eval = load_dataset(DATASET, split="test", difficulties=[level])
+    apps_eval = load_dataset(DATASET, split="train", difficulties=[level])
     results = {}
     for index in range(len(generations)):
         # code generations for problem (index)
