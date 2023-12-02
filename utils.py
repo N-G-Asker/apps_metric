@@ -5,6 +5,8 @@ import numpy as np
 from typing import Dict
 from datasets import load_dataset
 from .testing_util import run_test
+from time import localtime, strftime
+import pickle # For question-level logging
 
 DATASET = "codeparrot/apps"
 TIMEOUT = 10
@@ -48,12 +50,16 @@ def evaluate_generations(generations: list, level: str = "all", debug: bool = Fa
     # generations are code generations in the same order of the dataset
     apps_eval = load_dataset(DATASET, split="test", difficulties=[level])
     results = {}
+    logger = [] # For each question (a.k.a task), store a tuple holding the 
+                # problem_id together with a list marking which attempts pass vs. fail
+    success_count = 0
     for index in range(len(generations)):
         # code generations for problem (index)
         problem_generations = generations[index]
         # get corresponding samples from APPS dataset
         sample = apps_eval[index]
         res = []
+        tally = [] # record pass or fail for each attempt
         # loop over the generations
         for o_idx, o in enumerate(problem_generations):
             curr_res = [-2]
@@ -72,6 +78,9 @@ def evaluate_generations(generations: list, level: str = "all", debug: bool = Fa
                 if not np.all(curr_res):
                     if debug:
                         print(f"Results were not True for all test cases")
+                    tally.append(False)
+                else:
+                    tally.append(True)
             except Exception as e:
                 if debug:
                     print(f"Compilation failed, test framework exception = {repr(e)}{e}\n")
@@ -80,6 +89,20 @@ def evaluate_generations(generations: list, level: str = "all", debug: bool = Fa
                 assert isinstance(curr_res, list)
                 res.append(curr_res)
         results[index] = res
+        success_after_all = True if sum(tally)>0 else False
+        if success_after_all:
+            success_count +=1
+        print(f"Success Rate So Far: {success_count}/{index+1} = {success_count/(index+1)*100}%")
+        logger.append((sample["problem_id"], success_after_all, tally))
+                      # (ID, Pass or Fail, Record at the attempt level)
+
+    # Save logger to a file
+    filename = f"question-level-stats_log_"
+    filename += strftime("%d_%b_%Y_%I.%M%p", localtime())
+    filename += ".pkl"
+    with open(filename, "wb") as dump:
+        pickle.dump(logger, dump)
+
     return results
 
 
