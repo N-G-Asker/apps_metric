@@ -91,7 +91,7 @@ def evaluate_generations(generations: list, level: str = "all", debug: bool = Fa
                     tally.append(True)
                 else:
                     tally.append(False)
-                    
+
                 res.append(curr_res)
         results[index] = res
         success_after_all = True if sum(tally)>0 else False
@@ -101,12 +101,8 @@ def evaluate_generations(generations: list, level: str = "all", debug: bool = Fa
         logger.append((sample["problem_id"], success_after_all, tally))
                       # (ID, Pass or Fail, Record at the attempt level)
 
-    # Save logger to a file
-    filename = f"question-level-stats_log_"
-    filename += strftime("%d_%b_%Y_%I.%M%p", localtime())
-    filename += ".pkl"
-    with open(filename, "wb") as dump:
-        pickle.dump(logger, dump)
+    # Dump logger to stdout
+    print(logger)
 
     return results
 
