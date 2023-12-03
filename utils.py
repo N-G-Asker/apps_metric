@@ -78,19 +78,20 @@ def evaluate_generations(generations: list, level: str = "all", debug: bool = Fa
                 if not np.all(curr_res):
                     if debug:
                         print(f"Results were not True for all test cases")
-
-                # success is all-or-nothing
-                if np.all(curr_res):
-                    tally.append(True)
-                else:
-                    tally.append(False)
-
             except Exception as e:
                 if debug:
                     print(f"Compilation failed, test framework exception = {repr(e)}{e}\n")
                 break
             finally:
                 assert isinstance(curr_res, list)
+
+                gen = np.array(curr_res)
+                # success is all-or-nothing
+                if np.all(gen>0):
+                    tally.append(True)
+                else:
+                    tally.append(False)
+
                 res.append(curr_res)
         results[index] = res
         success_after_all = True if sum(tally)>0 else False
@@ -100,12 +101,8 @@ def evaluate_generations(generations: list, level: str = "all", debug: bool = Fa
         logger.append((sample["problem_id"], success_after_all, tally))
                       # (ID, Pass or Fail, Record at the attempt level)
 
-    # Save logger to a file
-    filename = f"question-level-stats_log_"
-    filename += strftime("%d_%b_%Y_%I.%M%p", localtime())
-    filename += ".pkl"
-    with open(filename, "wb") as dump:
-        pickle.dump(logger, dump)
+    # Dump logger to stdout
+    print(logger)
 
     return results
 
