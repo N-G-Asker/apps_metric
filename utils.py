@@ -78,19 +78,20 @@ def evaluate_generations(generations: list, level: str = "all", debug: bool = Fa
                 if not np.all(curr_res):
                     if debug:
                         print(f"Results were not True for all test cases")
-
-                # success is all-or-nothing
-                if np.all(curr_res):
-                    tally.append(True)
-                else:
-                    tally.append(False)
-
             except Exception as e:
                 if debug:
                     print(f"Compilation failed, test framework exception = {repr(e)}{e}\n")
                 break
             finally:
                 assert isinstance(curr_res, list)
+
+                gen = np.array(curr_res)
+                # success is all-or-nothing
+                if np.all(gen>0):
+                    tally.append(True)
+                else:
+                    tally.append(False)
+                    
                 res.append(curr_res)
         results[index] = res
         success_after_all = True if sum(tally)>0 else False
