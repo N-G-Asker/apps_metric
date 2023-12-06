@@ -48,7 +48,7 @@ def evaluate_generations(generations: list, level: str = "all", debug: bool = Fa
      """
 
     # generations are code generations in the same order of the dataset
-    apps_eval = load_dataset(DATASET, split="test", difficulties=[level])
+    apps_eval = load_dataset(DATASET, split="train", difficulties=[level])
     results = {}
     logger = [] # For each question (a.k.a task), store a tuple holding the 
                 # problem_id together with a list marking which attempts pass vs. fail
